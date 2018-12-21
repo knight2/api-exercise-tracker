@@ -30,7 +30,9 @@ router.post('/add', (req, res, next) =>{
 });
 
 router.get('/users', (req, res, next) =>{
-    res.json('get for users incomplete');
+    Users.find({}, (err, data) =>{
+        res.json(data);
+    });
 });
 
 router.get('/log', (req, res, next) =>{
