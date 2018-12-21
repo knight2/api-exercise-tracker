@@ -26,7 +26,27 @@ router.post('/new-user', (req, res, next) =>{
 });
 
 router.post('/add', (req, res, next) =>{
-    res.json('post for add incomplete');
+    Users.findById(req.body.userId, (err, user) =>{
+        if(err) return next(err);
+        if(!user){
+            return next({
+                status: 400,
+                message: 'unknown _id'
+            });
+        }
+        const exercise = new Exercises(req.body);
+        exercise.username = user.username;
+        exercise.save((err, savedExercise)=>{
+            if (err) return next(err);
+
+            savedExercise = savedExercise.toObject();
+            delete savedExercise.__v;
+            savedExercise._id = savedExercise.userId;
+            delete savedExercise.userId;
+            savedExercise.date = (new Date(savedExercise.date)).toDateString();
+            res.json(savedExercise);
+        });
+    });
 });
 
 router.get('/users', (req, res, next) =>{
