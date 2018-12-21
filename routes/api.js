@@ -56,7 +56,43 @@ router.get('/users', (req, res, next) =>{
 });
 
 router.get('/log', (req, res, next) =>{
-    res.json('get for log incomplete');
+    const from = new Date(req.query.from);
+    const to = new Date(req.query.to);
+    console.log(req.query.userId);
+
+    Users.findById(req.query.userId, (err, user) =>{
+        if (err) return next(err);
+        if (!user){
+            return next({status: 400, message: 'unknown user'});
+        }
+        console.log(user);
+
+        Exercises.find({
+            userId: req.query.userId,
+            date: {
+                $lt: to != 'Invalid Date' ? to.getTime() : Date.now(),
+                $gt: from != 'Invalid Date' ? from.getTime() : 0
+            }
+        }, {
+            __v: 0,
+            _id: 0
+        }).sort('-date').limit(parseInt(req.query.limit)).exec((err, exercises) =>{
+            if (err) return next(err);
+            const out = {
+                _id: req.query.userId,
+                username: user.username,
+                from: from != 'Invalid Date' ? from.toDateString() : undefined,
+                to: to != 'Invalid Date' ? to.toDateString() : undefined,
+                count: exercises.length,
+                log: exercises.map(e =>({
+                    description: e.description,
+                    duration: e.duration,
+                    date: e.date.toDateString()
+                }))
+            }
+            res.json(out);
+        });
+    });
 });
 
 module.exports = router;
