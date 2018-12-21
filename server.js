@@ -7,7 +7,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 require('dotenv').config();
 
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' , { useNewUrlParser: true })
 
 app.use(cors())
 
@@ -19,6 +19,9 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
+
+const apiRouter = require('./routes/api.js');
+app.use('/api/exercise', apiRouter);
 
 
 // Not found middleware

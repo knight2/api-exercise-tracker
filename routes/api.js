@@ -4,7 +4,25 @@ const Exercises = require('../models/exercises.js');
 const router = require('express').Router();
 
 router.post('/new-user', (req, res, next) =>{
-    res.json('post for new-user incomplete');
+    const user = new Users(req.body);
+
+    user.save((err, savedUser) =>{
+        if (err){
+            if (err.code  == 11000){
+                //uniqueness error
+                return next({
+                    status: 400,
+                    message: 'username already taken'
+                });
+            } else{
+                return next(err);
+            }
+        }
+        res.json({
+            username: savedUser.username,
+            _id: savedUser._id
+        });
+    });
 });
 
 router.post('/add', (req, res, next) =>{
